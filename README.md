@@ -15,42 +15,45 @@ increase from 0.04 CPU to 0.4 and sometimes even 0.7 the motivation is there to 
 In the example below, you can find how to use the custom rust-executable as livenessProbe
 
 ```yaml
-customLivenessProbe:
-  failureThreshold: 6
-  initialDelaySeconds: 30
-  periodSeconds: 20
-  successThreshold: 1
-  timeoutSeconds: 10
-  exec:
-    command:
-      - /custom-scripts/mongodb-rust-ping
-
 initContainers:
-  - name: download-ping-tool
-    image: busybox:1.36.0
-    imagePullPolicy: Always
+  - name: copy-ping-tool
+    image: ghcr.io/janvotava/mongodb-rust-ping:sha-f4d2bbb
+    imagePullPolicy: IfNotPresent
     command:
-      - sh
-      - -c
-      - |
-        #!/usr/bin/env bash -e
-        wget -O /custom-scripts/mongodb-rust-ping.tar.gz  \
-        "https://github.com/syndikat7/mongodb-rust-ping/releases/download/v0.1.8/mongodb-rust-ping-linux-x64.tar.gz"
-        cd /custom-scripts/ && tar -xzvf mongodb-rust-ping.tar.gz   
-        chmod +x /custom-scripts/mongodb-rust-ping
+      - cp
+    args:
+      - /usr/local/bin/mongodb-rust-ping
+      - /custom-scripts
     volumeMounts:
       - mountPath: "/custom-scripts"
         name: mongodb-ping-volume
-
 extraVolumeMounts:
   - name: mongodb-ping-volume
     mountPath: /custom-scripts
-
 extraVolumes:
   - name: mongodb-ping-volume
-    emptyDir:
-      sizeLimit: 100Mi
-
+    emptyDir: {}
+livenessProbe:
+  enabled: false
+customLivenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 20
+  timeoutSeconds: 10
+  failureThreshold: 6
+  exec:
+    command:
+      - /custom-scripts/mongodb-rust-ping
+readinessProbe:
+  enabled: false
+customReadinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 20
+  timeoutSeconds: 10
+  failureThreshold: 6
+  successThreshold: 1
+  exec:
+    command:
+      - /custom-scripts/mongodb-rust-ping
 ```
 
 ## License - MIT
