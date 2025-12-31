@@ -1,4 +1,4 @@
-FROM rust:1.71-alpine3.17 AS builder
+FROM rust:1.89-alpine3.22 AS builder
 RUN apk update && apk --no-cache add \
   musl-dev \
   make
