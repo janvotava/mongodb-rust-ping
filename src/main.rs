@@ -6,7 +6,7 @@ fn main() -> mongodb::error::Result<()> {
       println!("MONGODB_PORT_NUMBER MISSING!");
       std::process::exit(1);
     }
-    let uri = format!("mongodb://localhost:{}", port.unwrap());
+    let uri = format!("mongodb://localhost:{}/?directConnection=true", port.unwrap());
 
     // Create a new client and connect to the server
     let client = Client::with_uri_str(uri)?;
